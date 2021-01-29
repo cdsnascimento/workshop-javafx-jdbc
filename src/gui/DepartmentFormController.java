@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.concurrent.FutureTask;
 
 import db.DbException;
 import gui.listeners.DataChangeListener;

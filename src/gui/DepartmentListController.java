@@ -9,6 +9,7 @@ import application.Main;
 import gui.listeners.DataChangeListener;
 import gui.util.Alerts;
 import gui.util.Utils;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -17,6 +18,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.Alert.AlertType;
@@ -40,19 +42,22 @@ public class DepartmentListController implements Initializable, DataChangeListen
     @FXML
     private TableColumn<Department, String> tableColumnName;
 
+    @FXML
+    private TableColumn<Department, Department> tableColumnEDIT;
+
     private ObservableList<Department> obsList;
 
     @FXML
     private Button btNew;
 
     @FXML
-    public void onBtNewAction(ActionEvent event){
+    public void onBtNewAction(ActionEvent event) {
         Stage parentStage = Utils.currentStage(event);
         Department obj = new Department();
         createDialogForm(obj, "/gui/DepartmentForm.fxml", parentStage);
     }
 
-    public void setDepartmentService(DepartmentService service){
+    public void setDepartmentService(DepartmentService service) {
         this.service = service;
     }
 
@@ -63,14 +68,15 @@ public class DepartmentListController implements Initializable, DataChangeListen
 
     }
 
-    public void updateTableView(){
-        if (service == null){
+    public void updateTableView() {
+        if (service == null) {
             throw new IllegalStateException("Service was null");
         }
         List<Department> list = service.findAll();
         obsList = FXCollections.observableArrayList(list);
         tableViewDepartment.setItems(obsList);
-    }   
+        initEditButtons();
+    }
 
     private void initializeNodes() {
         tableColumnId.setCellValueFactory(new PropertyValueFactory<>("id"));
@@ -80,7 +86,7 @@ public class DepartmentListController implements Initializable, DataChangeListen
         tableViewDepartment.prefHeightProperty().bind(stage.heightProperty());
     }
 
-    private void createDialogForm(Department obj, String absolteName, Stage parentStage){
+    private void createDialogForm(Department obj, String absolteName, Stage parentStage) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(absolteName));
             Pane pane = loader.load();
@@ -90,7 +96,6 @@ public class DepartmentListController implements Initializable, DataChangeListen
             controller.setDepartmentService(new DepartmentService());
             controller.subscribeDataChangeListener(this);
             controller.updateFormData();
-            
 
             Stage dialoStage = new Stage();
             dialoStage.setTitle("Enter Department data");
@@ -108,6 +113,25 @@ public class DepartmentListController implements Initializable, DataChangeListen
     @Override
     public void onDataChanged() {
         updateTableView();
+    }
+
+    private void initEditButtons() {
+        tableColumnEDIT.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
+        tableColumnEDIT.setCellFactory(param -> new TableCell<Department, Department>() {
+            private final Button button = new Button("edit");
+
+            @Override
+            protected void updateItem(Department obj, boolean empty) {
+                super.updateItem(obj, empty);
+                if (obj == null) {
+                    setGraphic(null);
+                    return;
+                }
+                setGraphic(button);
+                button.setOnAction(
+                        event -> createDialogForm(obj, "/gui/DepartmentForm.fxml", Utils.currentStage(event)));
+            }
+        });
     }
 
 }
