@@ -1,9 +1,12 @@
 package gui;
 
 import java.net.URL;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
+
+import com.mysql.jdbc.Util;
 
 import application.Main;
 import db.DbIntegrityException;
@@ -41,6 +44,15 @@ public class SellerListController implements Initializable, DataChangeListener {
     private TableColumn<Seller, String> tableColumnName;
 
     @FXML
+    private TableColumn<Seller, String> tabeleColumnEmail;
+
+    @FXML
+    private TableColumn<Seller, Date> tabeleColumnBirthDate;
+
+    @FXML
+    private TableColumn<Seller, Double> tabeleColumnBaseSalry;
+
+    @FXML
     private TableColumn<Seller, Seller> tableColumnEDIT;
 
     @FXML
@@ -69,6 +81,21 @@ public class SellerListController implements Initializable, DataChangeListener {
 
     }
 
+    private void initializeNodes() {
+        tableColumnId.setCellValueFactory(new PropertyValueFactory<>("id"));
+        tableColumnName.setCellValueFactory(new PropertyValueFactory<>("name"));
+        tabeleColumnEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
+
+        tabeleColumnBirthDate.setCellValueFactory(new PropertyValueFactory<>("birthDate"));
+        Utils.formatTableColumnDate(tabeleColumnBirthDate, "dd/MM/yyyy");
+
+        tabeleColumnBaseSalry.setCellValueFactory(new PropertyValueFactory<>("baseSalary"));
+        Utils.formatTableColumnDouble(tabeleColumnBaseSalry, 2);
+
+        Stage stage = (Stage) Main.getMaiScene().getWindow();
+        tableViewSeller.prefHeightProperty().bind(stage.heightProperty());
+    }
+
     public void updateTableView() {
         if (service == null) {
             throw new IllegalStateException("Service was null");
@@ -78,14 +105,6 @@ public class SellerListController implements Initializable, DataChangeListener {
         tableViewSeller.setItems(obsList);
         initEditButtons();
         initRemoveButtons();
-    }
-
-    private void initializeNodes() {
-        tableColumnId.setCellValueFactory(new PropertyValueFactory<>("id"));
-        tableColumnName.setCellValueFactory(new PropertyValueFactory<>("name"));
-
-        Stage stage = (Stage) Main.getMaiScene().getWindow();
-        tableViewSeller.prefHeightProperty().bind(stage.heightProperty());
     }
 
     // private void createDialogForm(Seller obj, String absolteName, Stage parentStage) {
